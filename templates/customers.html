@@ -1,39 +1,100 @@
 {% extends "base.html" %}
 
-{% block title %}Customers{% endblock %}
-
 {% block content %}
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>Customers</h1>
-        <a href="{{ url_for('add_customer') }}" class="btn btn-primary">+ New Customer</a>
-    </div>
+<div class="container mt-4">
+  <h2>Customers</h2>
+  <a href="{{ url_for('customer.add_customer') }}" class="btn btn-primary mb-3">Add Customer</a>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Company</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for customer in customers %}
+      <tr>
+        <td class="customer-cell" data-id="{{ customer.id }}">{{ customer.name }}</td>
+        <td>{{ customer.email }}</td>
+        <td>{{ customer.phone }}</td>
+        <td>{{ customer.company }}</td>
+        <td>{{ customer.notes }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
-    <table class="table table-hover">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>E-Mail</th>
-                <th>Phone</th>
-                <th>Company</th>
-                <th>Process</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for customer in customers %}
-            <tr>
-                <td>{{ customer.name }}</td>
-                <td>{{ customer.email }}</td>
-                <td>{{ customer.phone }}</td>
-                <td>{{ customer.company }}</td>
-                <td>
-                    <a href="{{ url_for('delete_customer', customer_id=customer.id) }}"
-                        class="btn btn-sm btn-danger"
-                        onclick="return confirm('Delete customer?');">
-                        Delete
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<!-- Customer Modal -->
+<div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Customer Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        Loading...
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const cells = document.querySelectorAll(".customer-cell");
+    cells.forEach(cell => {
+        cell.addEventListener("click", async () => {
+            const customerId = cell.dataset.id;
+            const response = await fetch(`/customers/${customerId}/json`);
+            const data = await response.json();
+
+            let html = `
+                <p><strong>Name:</strong> ${data.name}</p>
+                <p><strong>Email:</strong> ${data.email}</p>
+                <p><strong>Phone:</strong> ${data.phone}</p>
+                <p><strong>Company:</strong> ${data.company}</p>
+                <p><strong>Notes:</strong> ${data.notes}</p>
+                <h5>Sales</h5>
+            `;
+
+            if(data.sales.length > 0){
+                html += `<table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Amount</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                `;
+                data.sales.forEach(sale => {
+                    html += `<tr>
+                        <td>${sale.product}</td>
+                        <td>${sale.amount}</td>
+                        <td>$${sale.price.toFixed(2)}</td>
+                        <td>$${(sale.amount * sale.price).toFixed(2)}</td>
+                        <td>${sale.date}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+            } else {
+                html += `<p>No sales for this customer.</p>`;
+            }
+
+            document.getElementById("modalTitle").textContent = data.name;
+            document.getElementById("modalBody").innerHTML = html;
+
+            var modal = new bootstrap.Modal(document.getElementById('customerModal'));
+            modal.show();
+        });
+    });
+});
+</script>
 {% endblock %}

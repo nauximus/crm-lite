@@ -1,5 +1,6 @@
 from flask import Flask
 from models import db
+from routes.dashboard import bp_dashboard
 from routes.customer import bp_customer
 from routes.sales import bp_sales
 
@@ -13,6 +14,7 @@ def create_app():
     with app.app_context():
         db.create_all()
 
+    app.register_blueprint(bp_dashboard)
     app.register_blueprint(bp_customer)
     app.register_blueprint(bp_sales)
 

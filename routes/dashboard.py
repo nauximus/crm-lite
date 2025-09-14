@@ -1,32 +1,43 @@
 from flask import Blueprint, render_template
-from models import Customer, Sale, db
-from collections import Counter
+from models import db, Sale
+from sqlalchemy import func
 from datetime import datetime
 
 bp_dashboard = Blueprint("dashboard", __name__)
 
 @bp_dashboard.route("/")
 def index():
-    # Customer data
-    customers = Customer.query.order_by(Customer.id.desc()).all()
-    total_customers = len(customers)
-
-    # Sales data
-    sales = Sale.query.order_by(Sale.date.desc()).all()
-    total_sales = sum([s.price * s.amount for s in sales])
-    
-    # --- Line chart data ---
-    monthly_salets_data = [0]*12
+    # Yearly and monthly sales
     current_year = datetime.now().year
-    for s in sales:
-        if s.date.year == current_year:
-            monthly_salets_data[s.date.month-1] += s.price * s.amount
-    monthly_labels = [ "January, February", "March", "April", "May", "June",
-                      "July", "August", "September", "October", "November"]
-    
-    # --- Pie chart data ---
-    product_counter = Counter()
-    for s in sales:
-        product_counter[s.product] += s.amount
+    monthly_sales = (
+        db.session.query(
+            func.strftime("%Y-%m", Sale.date).label("month"),
+            func.sum(Sale.amount * Sale.price).label("total")
+        )
+        .filter(func.strftime("%Y", Sale.date) == str(current_year))
+        .group_by("month")
+        .all()
+    )
+    top_products = (
+        db.session.query(
+            Sale.product,
+            func.sum(Sale.amount).label("total_sold")
+        )
+        .group_by(Sale.product)
+        .order_by(func.sum(Sale.amount).desc())
+    )
 
-    top_products = product_counter.most_common(5)
+    # Chart.js conversion to JSON
+    monthly_labels = [row[0] for row in monthly_sales]
+    monthly_totals = [row[1] for row in monthly_sales]
+
+    product_labels = [row[0] for row in top_products]
+    product_totals = [row[1] for row in top_products]
+
+    return render_template(
+        "index.html",
+        monthly_labels=monthly_labels,
+        monthly_totals=monthly_totals,
+        product_labels=product_labels,
+        product_totals=product_totals
+    )

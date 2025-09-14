@@ -1,42 +1,36 @@
 {% extends "base.html" %}
 
-{% block title %}New Sale{% endblock %}
-
 {% block content %}
-<h1 class="mb-4">+ New Sale</h1>
+<div class="container mt-4">
+    <h2>Add a Sale</h2>
+    <form method="POST" action="{{ url_for('sales.add_sale') }}">
+        <div class="mb-3">
+            <label for="customer_id" class="form-label">Customer</label>
+            <select class="form-select" id="customer_id" name="customer_id" required>
+                <option value="">-- Select Customer --</option>
+                {% for customer in customers %}
+                <option value="{{ customer.id }}">{{ customer.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-<form method="POST">
-    <div class="mb-3">
-        <label for="product" class="form-label">Product/Service</label>
-        <input type="text" class="form-control" id="product" name="product" required>
-    </div>
+        <div class="mb-3">
+            <label for="product" class="form-label">Product</label>
+            <input type="text" class="form-control" id="product" name="product" required>
+        </div>
 
-    <div class="mb-3">
-        <label for="customer_id" class="form-label">Customer</label>
-        <select class="form-select" id="customer_id" name="customer_id" required>
-            <option value="" selected disabled>Seçiniz</option>
-            {% for customer in customers %}
-            <option value="{{ customer.id }}">{{ customer.name }} ({{ customer.company }})</option>
-            {% endfor %}
-        </select>
-    </div>
+        <div class="mb-3">
+            <label for="amount" class="form-label">Amount</label>
+            <input type="number" class="form-control" id="amount" name="amount" min="1" required>
+        </div>
 
-    <div class="mb-3">
-        <label for="amount" class="form-label">Amount</label>
-        <input type="number" class="form-control" id="amount" name="amount" min="1" value="1" required>
-    </div>
+        <div class="mb-3">
+            <label for="price" class="form-label">Price</label>
+            <input type="number" class="form-control" id="price" name="price" step="0.01" required>
+        </div>
 
-    <div class="mb-3">
-        <label for="price" class="form-label">Price</label>
-        <input type="number" class="form-control" id="price" name="price" step="0.01" min="0" required>
-    </div>
-
-    <div class="mb-3">
-        <label for="date" class="form-label">Date</label>
-        <input type="date" class="form-control" id="date" name="date">
-    </div>
-
-    <button type="submit" class="btn btn-success">Save</button>
-    <a href="{{ url_for('sales.list_sales') }}" class="btn btn-secondary">Cancel</a>
-</form>
+        <button type="submit" class="btn btn-success">Save</button>
+        <a href="{{ url_for('sales.list_sales') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
 {% endblock %}
