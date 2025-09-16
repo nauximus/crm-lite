@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify, flash
 from models import db, Customer, Sale
 
 bp_customer = Blueprint("customer", __name__, url_prefix="/customers")
@@ -54,10 +54,15 @@ def customer_json(customer_id):
         "notes": customer.notes,
         "sales": sales_list
     })
+
 # Delete customer
-@bp_customer.route("/delete/<int:customer_id>")
+@bp_customer.route('/<int:customer_id>/delete', methods=['POST'])
 def delete_customer(customer_id):
     customer = Customer.query.get_or_404(customer_id)
+    for sale in customer.sales:
+        db.session.delete(sale)
+    
     db.session.delete(customer)
     db.session.commit()
+    flash("Customer deleted successfully.", "success")
     return redirect(url_for("customer.list_customers"))

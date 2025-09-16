@@ -17,12 +17,16 @@ nav a {
 
 .container {
   padding: 20px;
+  margin: auto;
+  width: 90%;
 }
 
 .charts {
   display: flex;
   justify-content: space-between;
   gap: 20px;
+  width: 50%;
+  margin: auto;
 }
 
 .chart {

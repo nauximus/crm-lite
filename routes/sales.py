@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from models import db, Sale, Customer
 from sqlalchemy import extract, func
 from collections import Counter
@@ -36,9 +36,10 @@ def add_sale():
         return redirect(url_for("sales.list_sales"))
     return render_template("add_sale.html", customers=customers)
 
-@bp_sales.route("/delete/<int:sale_id>")
+@bp_sales.route('/<int:sale_id>/delete', methods=['POST'])
 def delete_sale(sale_id):
     sale = Sale.query.get_or_404(sale_id)
     db.session.delete(sale)
     db.session.commit()
+    flash("Sale deleted successfully", "success")
     return redirect(url_for("sales.list_sales"))
