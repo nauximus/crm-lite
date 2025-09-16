@@ -22,6 +22,14 @@
         <td>{{ customer.phone }}</td>
         <td>{{ customer.company }}</td>
         <td>{{ customer.notes }}</td>
+        <td>
+          <form action="{{ url_for('customer.delete_customer', customer_id=customer.id) }}" method="POST" style="display: inline;">
+            <button type="submit" class="btn btn-danger btn-sm"
+                    onclick="return confirm('Are you sure you want to delete this customer?');">
+                  Delete
+                </button>
+          </form>
+        </td>
       </tr>
       {% endfor %}
     </tbody>
@@ -51,6 +59,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const customerId = cell.dataset.id;
             const response = await fetch(`/customers/${customerId}/json`);
             const data = await response.json();
+            console.log(data); // kontrol için
 
             let html = `
                 <p><strong>Name:</strong> ${data.name}</p>
@@ -61,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 <h5>Sales</h5>
             `;
 
-            if(data.sales.length > 0){
+            if (data.sales.length > 0) {
                 html += `<table class="table table-bordered">
                     <thead>
                         <tr>
@@ -91,7 +100,8 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("modalTitle").textContent = data.name;
             document.getElementById("modalBody").innerHTML = html;
 
-            var modal = new bootstrap.Modal(document.getElementById('customerModal'));
+            var modalEl = document.getElementById('customerModal');
+            var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
             modal.show();
         });
     });
