@@ -21,3 +21,4 @@ class Sale(db.Model):
     date = db.Column(db.DateTime, default=datetime.now)
 
     customer_id = db.Column(db.Integer, db.ForeignKey("customer.id"), nullable=False)
+    
