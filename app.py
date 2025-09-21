@@ -7,8 +7,11 @@ from routes.sales import bp_sales
 
 def create_app():
     app = Flask(__name__)
-    app.secret_key = os.urandom(24) # random key
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///crm.db'
+    app.secret_key = os.getenv("SECRET_KEY", "devsecret")
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+        "DATABASE_URL",
+        "sqlite:///crm.db" # fallback local dev db
+    )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
