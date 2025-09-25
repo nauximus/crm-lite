@@ -22,7 +22,7 @@ def add_sale():
         price = float(request.form["price"])
         customer_id = int(request.form["customer_id"])
         date_str = request.form.get("date")
-        date = datetime.strftime(date_str, "%d-%m-%Y") if date_str else datetime.now()
+        date = datetime.to_char("%d-%m-%Y", date_str) if date_str else datetime.now()
 
         new_sale = Sale(
             product=product, 

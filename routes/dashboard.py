@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template
 from models import db, Sale
-from sqlalchemy import func
+from sqlalchemy import func, cast, Date
 from datetime import datetime
 
 bp_dashboard = Blueprint("dashboard", __name__)
@@ -11,10 +11,10 @@ def index():
     current_year = datetime.now().year
     monthly_sales = (
         db.session.query(
-            func.strftime("%Y-%m", Sale.date).label("month"),
+            func.to_char(Sale.date, 'YYYY-MM').label("month"),
             func.sum(Sale.amount * Sale.price).label("total")
         )
-        .filter(func.strftime("%Y", Sale.date) == str(current_year))
+        .filter(func.to_char(Sale.date, "%Y") == str(current_year))
         .group_by("month")
         .all()
     )

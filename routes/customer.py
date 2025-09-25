@@ -43,7 +43,7 @@ def customer_json(customer_id):
             "product": s.product,
             "amount": s.amount,
             "price": s.price,
-            "date": s.date.strftime("%Y-%m-%d")
+            "date": s.date.to_char("%Y-%m-%d")
         } for s in sales
     ]
     return jsonify({

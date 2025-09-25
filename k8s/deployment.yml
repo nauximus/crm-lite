@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crm-lite
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: crm
+  template:
+    metadata:
+      labels:
+        app: crm
+    spec:
+      containers:
+        - name: web
+          image: <DOCKERHUB_USERNAME>/crm_app_web:latest
+          ports:
+          - containerPort: 5000
+          env:
+          - name: DATABASE_URL
+            value: "postgresql://crm:crmpassword@postgres:5432/crm_db"
+          - name: SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: crm-secret
+                key: SECRET_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crm-service
+spec:
+  selector:
+    app: crm
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+
